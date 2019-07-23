@@ -17,7 +17,8 @@ static int spi_flash_mtd_erase(struct mtd_info *mtd, struct erase_info *instr)
 {
 	struct spi_flash *flash = mtd->priv;
 	int err;
-
+	
+	printf("\n %s @ %d ",__func__,__LINE__);
 	if (!flash)
 		return -ENODEV;
 

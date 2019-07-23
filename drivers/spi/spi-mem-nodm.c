@@ -18,6 +18,7 @@ int spi_mem_exec_op(struct spi_slave *slave,
 	int ret;
 	int i;
 
+	printf("\n %s @ %d ",__func__,__LINE__);
 	if (op->data.nbytes) {
 		if (op->data.dir == SPI_MEM_DATA_IN)
 			rx_buf = op->data.buf.in;

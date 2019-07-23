@@ -23,6 +23,8 @@
 
 #include "sf_internal.h"
 
+#define DEBUG
+
 /* Define max times to check status register before we give up. */
 
 /*
@@ -81,6 +83,7 @@ static ssize_t spi_nor_read_data(struct spi_nor *nor, loff_t from, size_t len,
 	size_t remaining = len;
 	int ret;
 
+	printf("\n %s @ %d ",__func__,__LINE__);
 	/* get transfer protocols. */
 	op.cmd.buswidth = spi_nor_get_protocol_inst_nbits(nor->read_proto);
 	op.addr.buswidth = spi_nor_get_protocol_addr_nbits(nor->read_proto);
@@ -118,6 +121,7 @@ static ssize_t spi_nor_write_data(struct spi_nor *nor, loff_t to, size_t len,
 				   SPI_MEM_OP_DATA_OUT(len, buf, 1));
 	int ret;
 
+	printf("\n %s @ %d ",__func__,__LINE__);
 	/* get transfer protocols. */
 	op.cmd.buswidth = spi_nor_get_protocol_inst_nbits(nor->write_proto);
 	op.addr.buswidth = spi_nor_get_protocol_addr_nbits(nor->write_proto);
@@ -523,6 +527,7 @@ static int spi_nor_erase_sector(struct spi_nor *nor, u32 addr)
 			   SPI_MEM_OP_NO_DUMMY,
 			   SPI_MEM_OP_NO_DATA);
 
+	printf("\n %s @ %d ",__func__,__LINE__);
 	if (nor->erase)
 		return nor->erase(nor, addr);
 
@@ -542,6 +547,10 @@ static int spi_nor_erase(struct mtd_info *mtd, struct erase_info *instr)
 	struct spi_nor *nor = mtd_to_spi_nor(mtd);
 	u32 addr, len, rem;
 	int ret;
+
+	printf("\n %s @ %d ",__func__,__LINE__);
+	printf("[%s] at 0x%llx, len %lld\n", nor->info->name, (long long)instr->addr,
+		(long long)instr->len);
 
 	dev_dbg(nor->dev, "at 0x%llx, len %lld\n", (long long)instr->addr,
 		(long long)instr->len);
@@ -582,7 +591,8 @@ erase_err:
 	return ret;
 }
 
-#if defined(CONFIG_SPI_FLASH_STMICRO) || defined(CONFIG_SPI_FLASH_SST)
+#if defined(CONFIG_SPI_FLASH_STMICRO) || defined(CONFIG_SPI_FLASH_SST) || \
+	defined(CONFIG_SPI_FLASH_ISSI) 
 /* Write status register and ensure bits in mask match written values */
 static int write_sr_and_check(struct spi_nor *nor, u8 status_new, u8 mask)
 {
@@ -978,7 +988,7 @@ static const struct flash_info *spi_nor_read_id(struct spi_nor *nor)
 	int			tmp;
 	u8			id[SPI_NOR_MAX_ID_LEN];
 	const struct flash_info	*info;
-
+	
 	tmp = nor->read_reg(nor, SPINOR_OP_RDID, id, SPI_NOR_MAX_ID_LEN);
 	if (tmp < 0) {
 		dev_dbg(nor->dev, "error %d reading JEDEC ID\n", tmp);
@@ -2493,6 +2503,7 @@ int spi_nor_scan(struct spi_nor *nor)
 	mtd->_erase = spi_nor_erase;
 	mtd->_read = spi_nor_read;
 
+#if defined(CONFIG_SPI_FLASH_ISSI) 
 	/* NOR protection support for ISSI chips */
 	if (JEDEC_MFR(info) == SNOR_MFR_ISSI &&
 	    info->flags & SPI_NOR_HAS_LOCK &&
@@ -2500,6 +2511,7 @@ int spi_nor_scan(struct spi_nor *nor)
 		nor->flash_lock = issi_lock;
 		nor->flash_unlock = issi_unlock;
 	}
+#endif
 
 #if defined(CONFIG_SPI_FLASH_STMICRO) || defined(CONFIG_SPI_FLASH_SST)
 	/* NOR protection support for STmicro/Micron chips and similar */
@@ -2541,6 +2553,8 @@ int spi_nor_scan(struct spi_nor *nor)
 	/* Some devices cannot do fast-read, no matter what DT tells us */
 	if ((info->flags & SPI_NOR_NO_FR) || (spi->mode & SPI_RX_SLOW))
 		params.hwcaps.mask &= ~SNOR_HWCAPS_READ_FAST;
+	else
+		params.hwcaps.mask |= SNOR_HWCAPS_READ_FAST;
 
 	/*
 	 * Configure the SPI memory:
@@ -2602,6 +2616,8 @@ int spi_nor_scan(struct spi_nor *nor)
 	puts("\n");
 #endif
 
+	int sr = read_sr(nor);
+	printf("\n %s @ %d SR=0x%x ",__func__,__LINE__,sr);
 	return 0;
 }
 

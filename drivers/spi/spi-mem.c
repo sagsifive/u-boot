@@ -206,9 +206,11 @@ int spi_mem_exec_op(struct spi_slave *slave, const struct spi_mem_op *op)
 	int ret;
 	int i;
 
+	printf("\n %s @ %d ",__func__,__LINE__);
 	if (!spi_mem_supports_op(slave, op))
 		return -ENOTSUPP;
 
+	printf("\n %s @ %d ",__func__,__LINE__);
 	ret = spi_claim_bus(slave);
 	if (ret < 0)
 		return ret;
