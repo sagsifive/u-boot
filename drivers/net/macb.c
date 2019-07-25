@@ -1307,7 +1307,7 @@ static const struct udevice_id macb_eth_ids[] = {
 	{ .compatible = "atmel,sama5d3-gem" },
 	{ .compatible = "atmel,sama5d4-gem", .data = (ulong)&sama5d4_config },
 	{ .compatible = "cdns,zynq-gem" },
-	{ .compatible = "sifive,fu540-macb", .data = (ulong)&sifive_config },
+	{ .compatible = "sifive,fu540-c000-gem", .data = (ulong)&sifive_config},
 	{ }
 };
 
