@@ -1,9 +1,9 @@
-SiFive FU540 BOARD
+SiFive HIFIVE UNLEASHED BOARD
 M:	Paul Walmsley <paul.walmsley@sifive.com>
 M:	Palmer Dabbelt <palmer@sifive.com>
 M:	Anup Patel <anup.patel@wdc.com>
 M:	Atish Patra <atish.patra@wdc.com>
 S:	Maintained
-F:	board/sifive/fu540/
-F:	include/configs/sifive-fu540.h
-F:	configs/sifive_fu540_defconfig
+F:	board/sifive/hifive_unleashed/
+F:	include/configs/hifive_unleashed.h
+F:	configs/hifive_unleashed_defconfig

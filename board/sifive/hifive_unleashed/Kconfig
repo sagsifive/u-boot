@@ -1,16 +1,19 @@
-if TARGET_SIFIVE_FU540
+if TARGET_SIFIVE_HIFIVE_UNLEASHED
 
 config SYS_BOARD
-	default "fu540"
+	default "hifive_unleashed"
 
 config SYS_VENDOR
 	default "sifive"
 
+config SYS_SOC
+	default "fu540-c000"
+
 config SYS_CPU
-	default "generic"
+	default "u54-mc"
 
 config SYS_CONFIG_NAME
-	default "sifive-fu540"
+	default "hifive_unleashed"
 
 config SYS_TEXT_BASE
 	default 0x80000000 if !RISCV_SMODE
@@ -18,7 +21,7 @@ config SYS_TEXT_BASE
 
 config BOARD_SPECIFIC_OPTIONS # dummy
 	def_bool y
-	select GENERIC_RISCV
+	select U54_MC_RISCV
 	imply CMD_DHCP
 	imply CMD_EXT2
 	imply CMD_EXT4

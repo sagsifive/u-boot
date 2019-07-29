@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2018, Bin Meng <bmeng.cn@gmail.com>
 
-config GENERIC_RISCV
+config U54_MC_RISCV
 	bool
 	select ARCH_EARLY_INIT_R
 	imply CPU
