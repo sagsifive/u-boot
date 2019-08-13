@@ -65,12 +65,30 @@ struct flash_info {
 #define NO_CHIP_ERASE		BIT(12) /* Chip does not support chip erase */
 #define SPI_NOR_SKIP_SFDP	BIT(13)	/* Skip parsing of SFDP tables */
 #define USE_CLSR		BIT(14)	/* use CLSR command */
+#define SPI_NOR_HAS_BP3		BIT(15)	/*
+					 * Flash SR has block protect bits
+					 * for lock/unlock purpose, few support
+					 * BP0-BP2 while few support BP0-BP3.
+					 * This flag identifies devices that
+					 * support BP3 bit.
+					 */
 
 #ifdef CONFIG_SPI_FLASH_SFDP_SUPPORT
 	/* Part specific fixup hooks */
 	const struct spi_nor_fixups	*fixups;
 #endif
 };
+
+#ifdef CONFIG_SPI_FLASH_SFDP_SUPPORT
+/*
+ * Declare manufacturer specific fixup handlers that
+ * can be registered as fixup's in flash info table
+ * so as to update any wrong/broken SFDP parameter.
+ */
+#ifdef CONFIG_SPI_FLASH_ISSI
+extern struct spi_nor_fixups is25wp256_fixups;
+#endif
+#endif
 
 extern const struct flash_info spi_nor_ids[];
 
