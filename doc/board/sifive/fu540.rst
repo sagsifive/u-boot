@@ -363,3 +363,22 @@ load uImage.
 
    Please press Enter to activate this console.
    / #
+
+Sample spi nor flash test
+-------------------------
+
+.. code-block:: none
+
+   => sf probe 0:2
+   SF: Detected is25wp256 with page size 256 Bytes, erase size 4 KiB, total 32 MiB
+   => sf erase 0x1000000 0x100000
+   SF: 1048576 bytes @ 0x1000000 Erased: OK
+   => mw.b 0xc0000000 0xaa 0x100000
+   => sf write 0xc0000000 0x1000000 0x100000
+   device 0 offset 0x1000000, size 0x100000
+   SF: 1048576 bytes @ 0x1000000 Written: OK
+   => sf read 0xf0000000 0x1000000 0x100000
+   device 0 offset 0x1000000, size 0x100000
+   SF: 1048576 bytes @ 0x1000000 Read: OK
+   => cmp.b 0xf0000000 0xc0000000 0x100000
+   Total of 1048576 byte(s) were the same
