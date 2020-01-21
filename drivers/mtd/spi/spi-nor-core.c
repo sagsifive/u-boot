@@ -296,7 +296,6 @@ static void spi_nor_set_4byte_opcodes(struct spi_nor *nor,
 		nor->mtd.erasesize = info->sector_size;
 		break;
 
-	default:
 		break;
 	}
 
@@ -1800,6 +1799,57 @@ static const struct sfdp_bfpt_erase sfdp_bfpt_erases[] = {
 
 static int spi_nor_hwcaps_read2cmd(u32 hwcaps);
 
+#ifdef CONFIG_SPI_FLASH_SFDP_SUPPORT
+/**
+ * struct spi_nor_fixups - SPI NOR fixup hooks
+ * @post_bfpt: called after the BFPT table has been parsed
+ *
+ * Those hooks can be used to tweak the SPI NOR configuration when the SFDP
+ * table is broken or not available.
+ */
+struct spi_nor_fixups {
+	int (*post_bfpt)(struct spi_nor *nor,
+			 const struct sfdp_parameter_header *bfpt_header,
+			 const struct sfdp_bfpt *bfpt,
+			 struct spi_nor_flash_parameter *params);
+};
+
+static int spi_nor_post_bfpt_fixups(struct spi_nor *nor,
+				    const struct sfdp_parameter_header
+						*bfpt_header,
+				    const struct sfdp_bfpt *bfpt,
+				    struct spi_nor_flash_parameter *params)
+{
+	if (nor->info->fixups && nor->info->fixups->post_bfpt)
+		return nor->info->fixups->post_bfpt(nor, bfpt_header, bfpt,
+				params);
+
+	return 0;
+}
+
+static int is25wp256_post_bfpt_fixups(struct spi_nor *nor,
+				      const struct sfdp_parameter_header
+						*bfpt_header,
+				      const struct sfdp_bfpt *bfpt,
+				      struct spi_nor_flash_parameter *params)
+
+{
+	/* IS25WP256 supports 4B opcodes, but the BFPT advertises a
+	 * BFPT_DWORD1_ADDRESS_BYTES_3_ONLY address width.
+	 * Overwrite the address width advertised by the BFPT.
+	 */
+	if ((bfpt->dwords[BFPT_DWORD(1)] & BFPT_DWORD1_ADDRESS_BYTES_MASK) ==
+			BFPT_DWORD1_ADDRESS_BYTES_3_ONLY)
+		nor->addr_width = 4;
+
+	return 0;
+}
+
+struct spi_nor_fixups is25wp256_fixups = {
+	.post_bfpt = is25wp256_post_bfpt_fixups,
+};
+#endif
+
 /**
  * spi_nor_parse_bfpt() - read and parse the Basic Flash Parameter Table.
  * @nor:		pointer to a 'struct spi_nor'
@@ -1971,7 +2021,13 @@ static int spi_nor_parse_bfpt(struct spi_nor *nor,
 		return -EINVAL;
 	}
 
-	return 0;
+#ifdef CONFIG_SPI_FLASH_SFDP_SUPPORT
+	err = spi_nor_post_bfpt_fixups(nor, bfpt_header, &bfpt,
+				       params);
+#else
+	err = 0;
+#endif
+	return err;
 }
 
 /**
@@ -2208,6 +2264,9 @@ static int spi_nor_init_params(struct spi_nor *nor,
 	if ((info->flags & (SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ)) &&
 	    !(info->flags & SPI_NOR_SKIP_SFDP)) {
 		struct spi_nor_flash_parameter sfdp_params;
+
+		/* Update flash structure information to nor structure */
+		nor->info = info;
 
 		memcpy(&sfdp_params, params, sizeof(sfdp_params));
 		if (spi_nor_parse_sfdp(nor, &sfdp_params)) {
