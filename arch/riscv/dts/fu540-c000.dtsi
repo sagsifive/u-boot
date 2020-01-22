@@ -191,6 +191,7 @@
 			clocks = <&prci PRCI_CLK_TLCLK>;
 			#address-cells = <1>;
 			#size-cells = <0>;
+			num-cs = <1>;
 			status = "disabled";
 		};
 		qspi1: spi@10041000 {
@@ -202,6 +203,7 @@
 			clocks = <&prci PRCI_CLK_TLCLK>;
 			#address-cells = <1>;
 			#size-cells = <0>;
+			num-cs = <1>;
 			status = "disabled";
 		};
 		qspi2: spi@10050000 {
@@ -212,6 +214,7 @@
 			clocks = <&prci PRCI_CLK_TLCLK>;
 			#address-cells = <1>;
 			#size-cells = <0>;
+			num-cs = <1>;
 			status = "disabled";
 		};
 		eth0: ethernet@10090000 {
