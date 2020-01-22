@@ -433,6 +433,7 @@ int do_bdinfo(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 	print_bi_dram(bd);
 	print_num("relocaddr", gd->relocaddr);
 	print_num("reloc off", gd->reloc_off);
+	print_num("fdt_blob", (ulong)gd->fdt_blob);
 	print_eth_ip_addr();
 	print_baudrate();
 
