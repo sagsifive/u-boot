@@ -295,7 +295,19 @@ static void spi_nor_set_4byte_opcodes(struct spi_nor *nor,
 		nor->erase_opcode = SPINOR_OP_SE;
 		nor->mtd.erasesize = info->sector_size;
 		break;
-
+#ifdef CONFIG_TARGET_SIFIVE_FU540
+	/*
+	 * This flash device does support QUAD bit mode. But
+	 * with tx-rx width specified to 4 bit mode in dt the spi
+	 * driver is unable to access flash device. TODO: Once basic
+	 * operational support is moved to mainline remove this workaround.
+	 */
+	case SNOR_MFR_ISSI:
+		nor->read_opcode = SPINOR_OP_READ_FAST;
+		nor->program_opcode = SPINOR_OP_PP;
+		break;
+#endif
+	default:
 		break;
 	}
 
@@ -2636,6 +2648,7 @@ int spi_nor_scan(struct spi_nor *nor)
 		/* enable 4-byte addressing if the device exceeds 16MiB */
 		nor->addr_width = 4;
 		if (JEDEC_MFR(info) == SNOR_MFR_SPANSION ||
+		    JEDEC_MFR(info) == SNOR_MFR_ISSI ||
 		    info->flags & SPI_NOR_4B_OPCODES)
 			spi_nor_set_4byte_opcodes(nor, info);
 #else
