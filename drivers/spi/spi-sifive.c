@@ -186,6 +186,36 @@ static void sifive_spi_tx(struct sifive_spi *spi, const u8 *tx_ptr)
 	writel(tx_data, spi->regs + SIFIVE_SPI_REG_TXDATA);
 }
 
+static int sifive_spi_claim_bus(struct udevice *dev)
+{
+	int ret;
+	struct udevice *bus = dev->parent;
+	struct sifive_spi *spi = dev_get_priv(bus);
+	struct dm_spi_slave_platdata *slave = dev_get_parent_platdata(dev);
+
+	if (!(slave->cs < spi->num_cs)) {
+		printf("Invalid cs number = %d\n", slave->cs);
+		return -EINVAL;
+	}
+
+	sifive_spi_prep_device(spi, slave);
+
+	ret = sifive_spi_set_cs(spi, slave);
+	if (ret)
+		return ret;
+
+	return 0;
+}
+
+static int sifive_spi_release_bus(struct udevice *dev)
+{
+	struct sifive_spi *spi = dev_get_priv(dev->parent);
+
+	sifive_spi_clear_cs(spi);
+
+	return 0;
+}
+
 static int sifive_spi_xfer(struct udevice *dev, unsigned int bitlen,
 			   const void *dout, void *din, unsigned long flags)
 {
@@ -345,6 +375,10 @@ static int sifive_spi_probe(struct udevice *bus)
 	/* init the sifive spi hw */
 	sifive_spi_init_hw(spi);
 
+	/* Fetch number of chip selects from DT if present */
+	ret = dev_read_u32_default(bus, "num-cs", spi->num_cs);
+	spi->num_cs = ret;
+
 	return 0;
 }
 
@@ -353,6 +387,8 @@ static const struct dm_spi_ops sifive_spi_ops = {
 	.set_speed	= sifive_spi_set_speed,
 	.set_mode	= sifive_spi_set_mode,
 	.cs_info        = sifive_spi_cs_info,
+	.claim_bus	= sifive_spi_claim_bus,
+	.release_bus	= sifive_spi_release_bus,
 };
 
 static const struct udevice_id sifive_spi_ids[] = {
