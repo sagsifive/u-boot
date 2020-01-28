@@ -9,3 +9,11 @@
 		spi2 = &qspi2;
 	};
 };
+
+&qspi0 {
+	flash@0 {
+		spi-tx-bus-width = <1>;
+		spi-rx-bus-width = <1>;
+	};
+};
+
