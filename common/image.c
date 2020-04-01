@@ -452,7 +452,7 @@ int image_decomp(int comp, ulong load, ulong image_start, int type,
 		break;
 	}
 #endif /* CONFIG_BZIP2 */
-#ifdef CONFIG_LZMA
+#if defined(CONFIG_LZMA) && !defined(CONFIG_SPL_BUILD)
 	case IH_COMP_LZMA: {
 		SizeT lzma_len = unc_len;
 
