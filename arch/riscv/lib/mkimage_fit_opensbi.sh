@@ -36,6 +36,14 @@ cat << __HEADER_EOF
 			arch = "riscv";
 			compression = "none";
 			load = <$UBOOT_LOAD_ADDR>;
+			hash-1 {
+				algo = "sha256";
+				key-name-hint = "dev";
+			};
+			signature-1 {
+				algo = "sha256,rsa2048";
+				key-name-hint = "dev";
+			};
 		};
 		opensbi {
 			description = "RISC-V OpenSBI";
@@ -46,6 +54,14 @@ cat << __HEADER_EOF
 			compression = "none";
 			load = <$OPENSBI_LOAD_ADDR>;
 			entry = <$OPENSBI_LOAD_ADDR>;
+			hash-1 {
+				algo = "sha256";
+				key-name-hint = "dev";
+			};
+			signature-1 {
+				algo = "sha256,rsa2048";
+				key-name-hint = "dev";
+			};
 		};
 __HEADER_EOF
 
@@ -58,6 +74,14 @@ do
 			data = /incbin/("$dtname");
 			type = "flat_dt";
 			compression = "none";
+			hash-1 {
+				algo = "sha256";
+				key-name-hint = "dev";
+			};
+			signature-1 {
+				algo = "sha256,rsa2048";
+				key-name-hint = "dev";
+			};
 		};
 __FDT_IMAGE_EOF
 cnt=$((cnt+1))
@@ -85,6 +109,7 @@ do
 cat << __CONF_SECTION_EOF
 		config_$cnt {
 			description = "$(basename $dtname .dtb)";
+			uboot = "uboot";
 			firmware = "opensbi";
 			loadables = "uboot";
 			fdt = "fdt_$cnt";
