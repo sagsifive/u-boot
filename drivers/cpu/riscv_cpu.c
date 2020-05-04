@@ -35,6 +35,8 @@ static int riscv_cpu_get_info(struct udevice *dev, struct cpu_info *info)
 
 	/* Zero out the frequency, in case sizeof(ulong) != sizeof(u32) */
 	info->cpu_freq = 0;
+	/* Initialise cpu features before updating from device tree */
+	info->features = 0;
 
 	/* First try getting the frequency from the assigned clock */
 	ret = clk_get_by_index(dev, 0, &clk);
@@ -49,7 +51,7 @@ static int riscv_cpu_get_info(struct udevice *dev, struct cpu_info *info)
 		dev_read_u32(dev, "clock-frequency", (u32 *)&info->cpu_freq);
 
 	mmu = dev_read_string(dev, "mmu-type");
-	if (!mmu)
+	if (mmu)
 		info->features |= BIT(CPU_FEAT_MMU);
 
 	return 0;
