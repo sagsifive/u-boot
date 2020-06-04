@@ -581,6 +581,25 @@ static ulong sifive_fu540_prci_set_rate(struct clk *clk, ulong rate)
 	return rate;
 }
 
+static int sifive_fu540_prci_clk_request(struct clk *clk)
+{
+	debug("%s(clk=%p) (dev=%p, id=%lu)\n", __func__, clk, clk->dev,
+	      clk->id);
+
+	if (clk->id >= ARRAY_SIZE(__prci_init_clocks))
+		return -EINVAL;
+
+	return 0;
+}
+
+static int sifive_fu540_prci_clk_free(struct clk *clk)
+{
+	debug("%s(clk=%p) (dev=%p, id=%lu)\n", __func__, clk, clk->dev,
+	      clk->id);
+
+	return 0;
+}
+
 static int sifive_fu540_prci_probe(struct udevice *dev)
 {
 	int i, err;
@@ -612,6 +631,8 @@ static int sifive_fu540_prci_probe(struct udevice *dev)
 static struct clk_ops sifive_fu540_prci_ops = {
 	.set_rate = sifive_fu540_prci_set_rate,
 	.get_rate = sifive_fu540_prci_get_rate,
+	.request  = sifive_fu540_prci_clk_request,
+	.rfree	  = sifive_fu540_prci_clk_free,
 };
 
 static const struct udevice_id sifive_fu540_prci_ids[] = {
