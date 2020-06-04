@@ -35,6 +35,7 @@ static int riscv_cpu_get_info(struct udevice *dev, struct cpu_info *info)
 	int ret;
 	struct clk clk;
 	const char *mmu;
+	u32 split_cache_size;
 
 	/* Zero out the frequency, in case sizeof(ulong) != sizeof(u32) */
 	info->cpu_freq = 0;
@@ -56,6 +57,11 @@ static int riscv_cpu_get_info(struct udevice *dev, struct cpu_info *info)
 	mmu = dev_read_string(dev, "mmu-type");
 	if (mmu)
 		info->features |= BIT(CPU_FEAT_MMU);
+
+	/* check if I/D cache is present  */
+	ret = dev_read_u32(dev, "i-cache-size", &split_cache_size);
+	if (!ret)
+		info->features |= BIT(CPU_FEAT_L1_CACHE);
 
 	return 0;
 }
