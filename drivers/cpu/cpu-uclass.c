@@ -83,6 +83,9 @@ int cpu_get_info(struct udevice *dev, struct cpu_info *info)
 {
 	struct cpu_ops *ops = cpu_get_ops(dev);
 
+	/* Init cpu_info to 0 */
+	memset(info, 0, sizeof(struct cpu_info));
+
 	if (!ops->get_info)
 		return -ENOSYS;
 
